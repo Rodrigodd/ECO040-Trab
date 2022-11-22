@@ -1,7 +1,13 @@
 
 CC = g++
 SOURCES = Bubble1.cpp Bubble2.cpp Insertion.cpp Merge.cpp Quick.cpp Selection.cpp dicionario.cpp heapsort.cpp main.cpp
-FLAGS = -O3
+CFLAGS = -O3
 
-all: $(SOURCES)
-	$(CC) $(FLAGS) $(SOURCES) -o ordenacao.exe
+OBJECTS=$(addprefix obj/,$(patsubst %.cpp, %.o, $(SOURCES)))
+
+all: $(OBJECTS)
+	$(CC) $(CFLAGS) $(OBJECTS) -o ordenacao.exe
+
+$(OBJECTS): obj/%.o : %.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
+
