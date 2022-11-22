@@ -10,13 +10,59 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <ostream>
+#include <stdio.h>
+#include <vector>
 
 using namespace std;
 
+void mean_error(vector<long long> const &times, double &mean_, double &error_) {
+    if (times.empty())
+        return;
+    double sum = 0.0;
+    double sq_sum = 0.0;
+    for (int i = 0; i < times.size(); i++) {
+        double time = (double)times[i] / 1'000'000'000.0;
+        sum += time;
+        sq_sum += time * time;
+    }
+
+    double n = times.size();
+    sum = sum / n;
+
+    double mean = sum / n;
+    double var = (sq_sum - sum * sum) / (n - 1.0);
+
+    double error = sqrt(var / n);
+
+    double t[2];
+    mean_ = sum;
+    error_ = error;
+}
+
+void print_error(double mean, double error) {
+
+    int exp = (int)ceil(log10(mean));
+    int err_exp = (int)ceil(log10(error));
+    if (error > mean)
+        exp = err_exp;
+
+    int digitos = (exp - err_exp) + 2;
+
+    if (digitos > 5) {
+        digitos = 5;
+    }
+
+    printf("\t%.*fe%d±%.*fe%d", digitos, mean / pow(10.0, exp), exp, digitos,
+           error / pow(10.0, exp), exp);
+}
+
 void bench(dicionario &a, void (*fun)(char **, int)) {
+    vector<long long> times(1'000'000);
     for (int n = 1; n < 20'000; n = 2 * n) {
         // em nanosegundos
-        unsigned long long int total_time = 0;
+        unsigned long long total_time = 0;
+        times.clear();
 
         int t = 0;
         for (t = 1; t < 1'000'000'000; t++) {
@@ -25,9 +71,11 @@ void bench(dicionario &a, void (*fun)(char **, int)) {
             auto start = std::chrono::high_resolution_clock::now();
             fun(a.palavras, n);
             auto end = std::chrono::high_resolution_clock::now();
-            total_time += std::chrono::duration_cast<std::chrono::nanoseconds>(
-                              end - start)
-                              .count();
+            long long time =
+                chrono::duration_cast<chrono::nanoseconds>(end - start).count();
+
+            total_time += time;
+            times.push_back(time);
 
             // if (!a.checarOrdenado()) {
             //     cout << "Ordenação falhou";
@@ -35,22 +83,22 @@ void bench(dicionario &a, void (*fun)(char **, int)) {
             // }
 
             // maior que 5 segundos
-            if (total_time > 5'000'000'000) {
+            if (total_time > 5'000'000'000 && t >= 5) {
                 break;
             }
         }
 
-        double tempo = (double)total_time / 1'000'000'000.0 / (double)t;
+        double mean;
+        double error;
+        mean_error(times, mean, error);
 
-        int digitos = (int)(-log10(tempo) + 4);
-        if (digitos < 2)
-            digitos = 2;
-
-        printf("\t%.*f", digitos, tempo);
+        print_error(mean, error);
+        flush(cout);
     }
 }
+
 int main() {
-    /* setlocale(LC_ALL, "Portuguese"); */
+    // setlocale(LC_ALL, "");
 
     dicionario a = dicionario(40'000);
     a.embaralhar();
