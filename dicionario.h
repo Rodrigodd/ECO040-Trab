@@ -16,7 +16,7 @@ class dicionario {
     char **palavras;
     int n;
 
-    void embaralhar();
+    void embaralhar(int n = -1);
     bool checarOrdenado();
 
     dicionario(int _n);

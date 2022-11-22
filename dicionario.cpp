@@ -75,9 +75,11 @@ bool dicionario::checarOrdenado() {
     return true;
 }
 
-void dicionario::embaralhar() {
-    for (int i = 0; i < n; i++) {
-        int r = rand() % n;
-        swap(palavras[i], palavras[r]);
+void dicionario::embaralhar(int m) {
+    if (m == -1 || m >= n)
+        m = n - 1;
+    for (int i = 0; i < m; i++) {
+        int r = (rand() % (n - i - 1)) + 1;
+        swap(palavras[i], palavras[i + r]);
     }
 }

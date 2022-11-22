@@ -15,17 +15,15 @@ using namespace std;
 
 void bench(dicionario &a, void (*fun)(char **, int)) {
     for (int n = 1; n < 20'000; n = 2 * n) {
-        a.n = n;
-
         // em nanosegundos
         unsigned long long int total_time = 0;
 
         int t = 0;
-        for (t = 1; t < 1'000'000; t++) {
-            a.embaralhar();
+        for (t = 1; t < 1'000'000'000; t++) {
+            a.embaralhar(n);
 
             auto start = std::chrono::high_resolution_clock::now();
-            fun(a.palavras, a.n);
+            fun(a.palavras, n);
             auto end = std::chrono::high_resolution_clock::now();
             total_time += std::chrono::duration_cast<std::chrono::nanoseconds>(
                               end - start)
@@ -55,6 +53,8 @@ int main() {
     /* setlocale(LC_ALL, "Portuguese"); */
 
     dicionario a = dicionario(40'000);
+    a.embaralhar();
+    a.n = 16'384;
 
     struct {
         char const *name;
